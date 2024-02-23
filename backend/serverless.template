@@ -1,0 +1,48 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Backend lambda stack for communicating with bedrock
+
+Resources:
+  BedrockFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: lambda-bedrock-handler
+      CodeUri: .
+      Handler: handler.lambda_handler
+      Runtime: python3.10
+      Timeout: 10
+      MemorySize: 1024
+      Architectures:
+        - arm64
+      Policies:
+        - AWSLambdaBasicExecutionRole
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - bedrock:RetrieveAndGenerate
+                - bedrock:Retrieve
+              Resource: !Sub "arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:knowledge-base/XJDY7RIAYL"
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - bedrock:InvokeModel
+              Resource: !Sub "arn:aws:bedrock:${AWS::Region}::foundation-model/anthropic.claude-v2:1"
+      Environment:
+        Variables:
+          KNOWLEDGE_BASE_ID: XJDY7RIAYL
+      FunctionUrlConfig:
+        AuthType: NONE
+        Cors:
+          AllowCredentials: true 
+          AllowHeaders: 
+            - "*" 
+          AllowMethods: 
+            - "*" 
+          AllowOrigins: 
+            - "https://loyaltycloudservices-chat.streamlit.app" 
+          ExposeHeaders: 
+            - "*" 
+          MaxAge: 300 
+
