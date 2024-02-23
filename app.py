@@ -34,7 +34,7 @@ if prompt := st.chat_input("What is up?"):
     print(payload)
     
     # Specify the function URL
-    function_url = "https://5wdtvz36sjv73xcl3uruea5j4i0oqblh.lambda-url.us-west-2.on.aws/"
+    function_url = os.environ.get('FUNCTION_URL')
 
     # Make a POST request to the function URL
     response = requests.post(function_url, json=payload)
