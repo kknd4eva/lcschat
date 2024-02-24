@@ -5,57 +5,51 @@ import os
 
 st.title("Loyalty Cloud Services Guru")
 
-# Use a hardcoded session ID or generate one as needed
-sessionId = "None"
-# sessionId = ''.join(random.choices(string.ascii_uppercase + string.digits, k=12))
-print(sessionId)
+# Sidebar or another section for instructions or summary information
+st.sidebar.title("Sample questions to get started")
+st.sidebar.markdown("""
+- What is LCS? 
+- How do I replace a loyalty card using LCS? 
+- Does LCS talk to any SAP systems? 
+- How is a loyalty customer created online?
+""")
 
-# Initialize chat history
+
+# Initialize chat history and session ID if not already in session state
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Initialize session id
 if 'sessionId' not in st.session_state:
-    st.session_state['sessionId'] = sessionId
+    st.session_state['sessionId'] = "None"
 
-# Display chat messages from history on app rerun
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+# Using columns to layout the chat and potential additional info or actions
+col1, col2 = st.columns([3, 1])  # Adjust the ratio as needed
 
-# React to user input
-if prompt := st.chat_input("What is up?"):
-    # Display user input in chat message container
-    question = prompt
-    st.chat_message("user").markdown(question)
+with col1:
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
 
-    # Prepare the payload for the HTTP request
-    payload = {"question": prompt, "sessionid": st.session_state['sessionId']}
-   
-    # Specify the function URL
-    function_url = os.environ.get('FUNCTION_URL')
+    if prompt := st.chat_input("What would you like to know?"):
+        question = prompt
+        st.chat_message("user").markdown(question)
 
-    with st.spinner('LCS Guru is thinking...'):  
-        response = requests.post(function_url, json=payload)
+        payload = {"question": prompt, "sessionid": st.session_state['sessionId']}
+        function_url = os.environ.get('FUNCTION_URL')
 
-    # Check if the request was successful
-    if response.status_code == 200:
-        result = response.json()
-        print(result)
+        with st.spinner('LCS Guru is thinking...'):
+            response = requests.post(function_url, json=payload)
 
-        answer = result['answer']
-        sessionId = result.get('sessionId', 'None')  # Update this line based on the actual key returned for session ID
+        if response.status_code == 200:
+            result = response.json()
+            answer = result['answer']
+            st.session_state['sessionId'] = result.get('sessionId', 'None')
 
-        st.session_state['sessionId'] = sessionId
+            st.session_state.messages.append({"role": "user", "content": question})
+            with st.chat_message("assistant"):
+                st.markdown(answer)
+            st.session_state.messages.append({"role": "assistant", "content": answer})
+        else:
+            st.error('Failed to get a response from the chat service.')
 
-        # Add user input to chat history
-        st.session_state.messages.append({"role": "user", "content": question})
 
-        # Display assistant response in chat message container
-        with st.chat_message("assistant"):
-            st.markdown(answer)
-
-        # Add assistant response to chat history
-        st.session_state.messages.append({"role": "assistant", "content": answer})
-    else:
-        st.error(response)
