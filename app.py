@@ -3,7 +3,7 @@ import requests
 import json
 import os 
 
-st.title("Loyalty Cloud Services Guru: Version 1.0")
+st.title("Loyalty Cloud Services Guru")
 
 # Use a hardcoded session ID or generate one as needed
 sessionId = "None"
@@ -35,8 +35,8 @@ if prompt := st.chat_input("What is up?"):
     # Specify the function URL
     function_url = os.environ.get('FUNCTION_URL')
 
-    # Make a POST request to the function URL
-    response = requests.post(function_url, json=payload)
+    with st.spinner('LCS Guru is thinking...'):  
+        response = requests.post(function_url, json=payload)
 
     # Check if the request was successful
     if response.status_code == 200:

@@ -1,6 +1,6 @@
 import os
 import boto3
-
+import json
 
 boto3_session = boto3.session.Session()
 region = boto3_session.region_name
@@ -48,10 +48,11 @@ def retrieveAndGenerate(input, kbId, model_arn, sessionId=None):
 
 
 def lambda_handler(event, context):
-    #print the event as json
-    print(event)
-    query = event["question"]
-    session_id = event["sessionid"]
+
+    body = json.loads(event['body'])
+    query = body["question"]
+    session_id = body["sessionid"]
+
     response = retrieveAndGenerate(query, kb_id, model_arn, session_id)
     generated_text = response['output']['text']
     print(generated_text)

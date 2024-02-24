@@ -10,7 +10,7 @@ Resources:
       CodeUri: .
       Handler: handler.lambda_handler
       Runtime: python3.10
-      Timeout: 10
+      Timeout: 20
       MemorySize: 1024
       Architectures:
         - arm64
