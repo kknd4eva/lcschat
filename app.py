@@ -30,9 +30,8 @@ if prompt := st.chat_input("What is up?"):
     st.chat_message("user").markdown(question)
 
     # Prepare the payload for the HTTP request
-    payload = json.dumps({"question":prompt,"sessionId": st.session_state['sessionId']})
-    print(payload)
-    
+    payload = {"question": prompt, "sessionid": st.session_state['sessionId']}
+   
     # Specify the function URL
     function_url = os.environ.get('FUNCTION_URL')
 
