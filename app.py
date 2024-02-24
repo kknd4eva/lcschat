@@ -14,42 +14,57 @@ st.sidebar.markdown("""
 - How is a loyalty customer created online?
 """)
 
+# Use a hardcoded session ID or generate one as needed
+sessionId = "None"
+# sessionId = ''.join(random.choices(string.ascii_uppercase + string.digits, k=12))
+print(sessionId)
 
-# Initialize chat history and session ID if not already in session state
+# Initialize chat history
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
+# Initialize session id
 if 'sessionId' not in st.session_state:
-    st.session_state['sessionId'] = "None"
+    st.session_state['sessionId'] = sessionId
 
-# Using columns to layout the chat and potential additional info or actions
-col1, col2 = st.columns([3, 1])  # Adjust the ratio as needed
+# Display chat messages from history on app rerun
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
 
-with col1:
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+# React to user input
+if prompt := st.chat_input("How can I help you?"):
+    # Display user input in chat message container
+    question = prompt
+    st.chat_message("user").markdown(question)
 
-    if prompt := st.chat_input("What would you like to know?"):
-        question = prompt
-        st.chat_message("user").markdown(question)
+    # Prepare the payload for the HTTP request
+    payload = {"question": prompt, "sessionid": st.session_state['sessionId']}
+   
+    # Specify the function URL
+    function_url = os.environ.get('FUNCTION_URL')
 
-        payload = {"question": prompt, "sessionid": st.session_state['sessionId']}
-        function_url = os.environ.get('FUNCTION_URL')
+    with st.spinner('LCS Guru is thinking..shhhh'):  
+        response = requests.post(function_url, json=payload)
 
-        with st.spinner('LCS Guru is thinking...'):
-            response = requests.post(function_url, json=payload)
+    # Check if the request was successful
+    if response.status_code == 200:
+        result = response.json()
+        print(result)
 
-        if response.status_code == 200:
-            result = response.json()
-            answer = result['answer']
-            st.session_state['sessionId'] = result.get('sessionId', 'None')
+        answer = result['answer']
+        sessionId = result.get('sessionId', 'None')  # Update this line based on the actual key returned for session ID
 
-            st.session_state.messages.append({"role": "user", "content": question})
-            with st.chat_message("assistant"):
-                st.markdown(answer)
-            st.session_state.messages.append({"role": "assistant", "content": answer})
-        else:
-            st.error('Failed to get a response from the chat service.')
+        st.session_state['sessionId'] = sessionId
 
+        # Add user input to chat history
+        st.session_state.messages.append({"role": "user", "content": question})
 
+        # Display assistant response in chat message container
+        with st.chat_message("assistant"):
+            st.markdown(answer)
+
+        # Add assistant response to chat history
+        st.session_state.messages.append({"role": "assistant", "content": answer})
+    else:
+        st.error(response)
