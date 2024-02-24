@@ -3,7 +3,7 @@ import requests
 import json
 import os 
 
-st.title("Loyalty Cloud Services Guru")
+st.title("Loyalty Cloud Services Guru: Version 1.0")
 
 # Use a hardcoded session ID or generate one as needed
 sessionId = "None"
@@ -58,5 +58,4 @@ if prompt := st.chat_input("What is up?"):
         # Add assistant response to chat history
         st.session_state.messages.append({"role": "assistant", "content": answer})
     else:
-        print(response.json())
-        st.error('Failed to get a response from the chat service.')
+        st.error(response)

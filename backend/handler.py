@@ -48,6 +48,8 @@ def retrieveAndGenerate(input, kbId, model_arn, sessionId=None):
 
 
 def lambda_handler(event, context):
+    #print the event as json
+    print(event)
     query = event["question"]
     session_id = event["sessionid"]
     response = retrieveAndGenerate(query, kb_id, model_arn, session_id)
