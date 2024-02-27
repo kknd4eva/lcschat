@@ -1,5 +1,7 @@
 import streamlit as st
 import requests
+import random
+import string
 import json
 import os 
 
@@ -14,9 +16,7 @@ st.sidebar.markdown("""
 - How is a loyalty customer created online?
 """)
 
-# Use a hardcoded session ID or generate one as needed
-sessionId = "None"
-# sessionId = ''.join(random.choices(string.ascii_uppercase + string.digits, k=12))
+sessionId = ''.join(random.choices(string.ascii_uppercase + string.digits, k=12))
 print(sessionId)
 
 # Initialize chat history
